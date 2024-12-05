@@ -1,0 +1,15 @@
+.carlist-container {
+  padding: var(--space-lg);
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-lg);
+}
+
+.table-header h2 {
+  margin: 0;
+  color: var(--text-primary);
+} 

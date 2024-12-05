@@ -1,0 +1,24 @@
+.car-form-page {
+  padding: var(--space-lg);
+}
+
+.car-form-page h2 {
+  margin-bottom: var(--space-lg);
+  color: var(--text-primary);
+}
+
+.car-form-page .container {
+  max-width: 600px;
+  margin: 0 auto;
+  background: var(--bg-primary);
+  padding: var(--space-lg);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  margin-top: var(--space-lg);
+} 

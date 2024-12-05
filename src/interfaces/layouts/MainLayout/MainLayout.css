@@ -1,0 +1,42 @@
+.main-layout {
+  min-height: 100vh;
+  width: 100vw;
+}
+
+.main-layout .ant-layout-header {
+  padding: 0 16px;
+  background: #001529;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  width: 100%;
+  line-height: 64px;
+  height: 64px;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  gap: 20px;
+}
+
+.header-title {
+  color: white;
+  font-size: 20px;
+  white-space: nowrap;
+}
+
+.main-layout .ant-menu {
+  background: transparent;
+  border-bottom: none;
+}
+
+.main-layout .ant-layout-content {
+  padding-top: 64px;
+  margin: 0;
+  min-height: calc(100vh - 64px);
+  background: #fff;
+} 
