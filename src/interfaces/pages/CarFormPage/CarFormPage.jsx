@@ -1,7 +1,5 @@
-import CarService from '@application/services/CarService';
-import CarApiRepository from '@infrastructure/api/CarApiRepository';
+import { useCarQueries } from '@application/hooks/useCarQueries';
 import { Button, Form, Input, InputNumber } from 'antd';
-import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import './CarFormPage.css';
 
@@ -9,45 +7,55 @@ function CarFormPage() {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const { id } = useParams();
-  const [loading, setLoading] = useState(false);
 
-  // สร้าง dependencies
-  const carRepository = new CarApiRepository();
-  const carService = new CarService(carRepository);
+  const {
+    useGetCarById,
+    useAddCar,
+    useUpdateCar,
+  } = useCarQueries();
 
-  useEffect(() => {
-    if (id) {
-      loadCar();
-    }
-  }, [id]);
+  // ดึงข้อมูลรถกรณีแก้ไข
+  const {
+    data: car,
+    isLoading: isLoadingCar,
+    error: carError,
+  } = useGetCarById(id, {
+    enabled: !!id,
+    onSuccess: (data) => {
+      form.setFieldsValue(data);
+    },
+  });
 
-  const loadCar = async () => {
-    try {
-      setLoading(true);
-      const car = await carService.getCarById(id);
-      form.setFieldsValue(car);
-    } catch (error) {
-      console.error('Error loading car:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // mutation สำหรับเพิ่ม/แก้ไขข้อมูล
+  const addCarMutation = useAddCar({
+    onSuccess: () => {
+      navigate('/cars');
+    },
+  });
+
+  const updateCarMutation = useUpdateCar({
+    onSuccess: () => {
+      navigate('/cars');
+    },
+  });
 
   const onFinish = async (values) => {
     try {
-      setLoading(true);
       if (id) {
-        await carService.updateCar(id, values);
+        await updateCarMutation.mutateAsync({ id, data: values });
       } else {
-        await carService.createCar(values);
+        await addCarMutation.mutateAsync(values);
       }
-      navigate('/cars');
     } catch (error) {
       console.error('Error saving car:', error);
-    } finally {
-      setLoading(false);
     }
   };
+
+  if (id && carError) {
+    return <div>เกิดข้อ��ิดพลาด: {carError.message}</div>;
+  }
+
+  const isLoading = isLoadingCar || addCarMutation.isPending || updateCarMutation.isPending;
 
   return (
     <div className="car-form-page">
@@ -57,7 +65,7 @@ function CarFormPage() {
           form={form}
           layout="vertical"
           onFinish={onFinish}
-          disabled={loading}
+          disabled={isLoading}
         >
           <Form.Item
             name="brand"
@@ -86,7 +94,7 @@ function CarFormPage() {
           <Form.Item
             name="year"
             label="ปี"
-            rules={[{ required: true, message: 'กรุณาระบุปีรถ' }]}
+            rules={[{ required: true, message: 'กรุณาร��บุปีรถ' }]}
           >
             <InputNumber
               className="w-100"
@@ -113,7 +121,7 @@ function CarFormPage() {
               <Button onClick={() => navigate('/cars')}>
                 ยกเลิก
               </Button>
-              <Button type="primary" htmlType="submit" loading={loading}>
+              <Button type="primary" htmlType="submit" loading={isLoading}>
                 {id ? 'บันทึกการแก้ไข' : 'เพิ่มรถ'}
               </Button>
             </div>

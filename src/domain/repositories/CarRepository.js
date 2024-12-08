@@ -1,24 +1,32 @@
-// Car Repository Interface
-class CarRepository {
-  async findAll() {
-    throw new Error('Method not implemented');
+// Car repository interface
+export class CarRepository {
+  // Get all cars
+  async getAllCars() {
+    throw new Error('Not implemented');
   }
 
-  async findById(id) {
-    throw new Error('Method not implemented');
+  // Get car by ID
+  async getCarById(id) {
+    throw new Error('Not implemented');
   }
 
-  async save(car) {
-    throw new Error('Method not implemented');
+  // Search cars by filters
+  async searchCars(filters) {
+    throw new Error('Not implemented');
   }
 
-  async update(id, car) {
-    throw new Error('Method not implemented');
+  // Add new car
+  async addCar(car) {
+    throw new Error('Not implemented');
   }
 
-  async delete(id) {
-    throw new Error('Method not implemented');
+  // Update car
+  async updateCar(id, car) {
+    throw new Error('Not implemented');
   }
-}
 
-export default CarRepository; 
+  // Delete car
+  async deleteCar(id) {
+    throw new Error('Not implemented');
+  }
+} 

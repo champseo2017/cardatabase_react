@@ -1,44 +1,38 @@
-import Car from '@domain/entities/Car';
+import { carApi } from '@infrastructure/api/carApi';
 
-class CarService {
-  constructor(carRepository) {
-    this.carRepository = carRepository;
+// Car service class for business logic
+export class CarService {
+  constructor() {
+    this.api = carApi;
   }
 
+  // Get all cars
   async getAllCars() {
-    return await this.carRepository.findAll();
+    return this.api.getAllCars();
   }
 
+  // Get car by ID
   async getCarById(id) {
-    return await this.carRepository.findById(id);
+    return this.api.getCarById(id);
   }
 
-  async createCar(carData) {
-    const car = new Car(
-      carData.brand,
-      carData.model,
-      carData.color,
-      carData.year,
-      carData.price
-    );
-    return await this.carRepository.save(car);
+  // Search cars by filters
+  async searchCars(filters) {
+    return this.api.searchCars(filters);
   }
 
+  // Add new car
+  async addCar(carData) {
+    return this.api.addCar(carData);
+  }
+
+  // Update car
   async updateCar(id, carData) {
-    const car = new Car(
-      carData.brand,
-      carData.model,
-      carData.color,
-      carData.year,
-      carData.price,
-      id
-    );
-    return await this.carRepository.update(id, car);
+    return this.api.updateCar(id, carData);
   }
 
+  // Delete car
   async deleteCar(id) {
-    return await this.carRepository.delete(id);
+    return this.api.deleteCar(id);
   }
-}
-
-export default CarService; 
+} 

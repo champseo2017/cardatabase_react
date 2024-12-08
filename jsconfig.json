@@ -3,11 +3,13 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
+      "@app/*": ["src/application/*"],
       "@domain/*": ["src/domain/*"],
-      "@application/*": ["src/application/*"],
       "@infrastructure/*": ["src/infrastructure/*"],
       "@interfaces/*": ["src/interfaces/*"],
-      "@shared/*": ["src/shared/*"]
+      "@shared/*": ["src/shared/*"],
+      "@assets/*": ["src/assets/*"],
+      "@application/*": ["src/application/*"]
     }
   }
 } 

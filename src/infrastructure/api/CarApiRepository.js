@@ -1,5 +1,5 @@
-import Car from '@domain/entities/Car';
-import CarRepository from '@domain/repositories/CarRepository';
+import { Car } from '@domain/entities/Car';
+import { CarRepository } from '@domain/repositories/CarRepository';
 
 class CarApiRepository extends CarRepository {
   constructor(baseUrl = 'http://localhost:8080/api') {
@@ -11,7 +11,7 @@ class CarApiRepository extends CarRepository {
     try {
       const response = await fetch(`${this.baseUrl}/cars`);
       const data = await response.json();
-      return data._embedded.cars.map(carData => Car.fromDTO(carData));
+      return data._embedded.cars.map(carData => Car.fromJSON(carData));
     } catch (error) {
       console.error('Error fetching cars:', error);
       throw error;
@@ -22,7 +22,7 @@ class CarApiRepository extends CarRepository {
     try {
       const response = await fetch(`${this.baseUrl}/cars/${id}`);
       const data = await response.json();
-      return Car.fromDTO(data);
+      return Car.fromJSON(data);
     } catch (error) {
       console.error(`Error fetching car with id ${id}:`, error);
       throw error;
@@ -36,10 +36,10 @@ class CarApiRepository extends CarRepository {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(car.toDTO()),
+        body: JSON.stringify(car.toJSON()),
       });
       const data = await response.json();
-      return Car.fromDTO(data);
+      return Car.fromJSON(data);
     } catch (error) {
       console.error('Error saving car:', error);
       throw error;
@@ -53,10 +53,10 @@ class CarApiRepository extends CarRepository {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(car.toDTO()),
+        body: JSON.stringify(car.toJSON()),
       });
       const data = await response.json();
-      return Car.fromDTO(data);
+      return Car.fromJSON(data);
     } catch (error) {
       console.error(`Error updating car with id ${id}:`, error);
       throw error;
@@ -76,4 +76,4 @@ class CarApiRepository extends CarRepository {
   }
 }
 
-export default CarApiRepository; 
+export { CarApiRepository };

@@ -1,18 +1,38 @@
+import { useCarQueries } from '@/application/hooks/useCarQueries';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import CarService from '@application/services/CarService';
-import CarApiRepository from '@infrastructure/api/CarApiRepository';
-import { Button, Popconfirm, Space, Table } from 'antd';
-import { useEffect, useState } from 'react';
+import { Button, Popconfirm, Space, Table, Tag } from 'antd';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function CarList() {
-  const [cars, setCars] = useState([]);
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useState({
+    brand: '',
+    model: '',
+    year: '',
+  });
 
-  // สร้าง dependencies
-  const carRepository = new CarApiRepository();
-  const carService = new CarService(carRepository);
+  const { useGetCars, useDeleteCar } = useCarQueries();
+  
+  // ใช้ query hook เพื่อดึงข้อมูลรถ
+  const { data: cars = [], isLoading, error } = useGetCars();
+  
+  // ใช้ mutation hook สำหรับลบรถ
+  const deleteMutation = useDeleteCar();
+
+  const handleDelete = async (id) => {
+    if (!id) return;
+    try {
+      await deleteMutation.mutateAsync(id);
+    } catch (error) {
+      console.error('Error deleting car:', error);
+    }
+  };
+
+  const handleEdit = (id) => {
+    if (!id) return;
+    navigate(`/cars/${id}/edit`);
+  };
 
   const columns = [
     {
@@ -39,82 +59,69 @@ function CarList() {
       key: 'color',
     },
     {
+      title: 'ระเบียน',
+      dataIndex: 'registerNumber',
+      key: 'registerNumber',
+    },
+    {
       title: 'ราคา',
       dataIndex: 'price',
       key: 'price',
       sorter: (a, b) => a.price - b.price,
+      render: (price) => price?.toLocaleString('th-TH', { style: 'currency', currency: 'THB' }),
+    },
+    {
+      title: 'เจ้าของ',
+      dataIndex: 'owners',
+      key: 'owners',
+      render: (owners) => (
+        <Space size={[0, 4]} wrap>
+          {owners?.map((owner) => (
+            <Tag key={owner.ownerid} color="blue">
+              {owner.firstname} {owner.lastname}
+            </Tag>
+          ))}
+        </Space>
+      ),
     },
     {
       title: 'จัดการ',
       key: 'action',
-      render: (_, record) => {
-        // ดึง ID จาก URL ใน _links
-        const id = record._links?.self?.href?.split('/').pop();
-        
-        return (
-          <Space size="middle">
+      render: (_, record) => (
+        <Space size="middle">
+          <Button 
+            type="primary" 
+            icon={<EditOutlined />}
+            onClick={() => handleEdit(record.id)}
+            disabled={!record.id}
+          >
+            แก้ไข
+          </Button>
+          <Popconfirm
+            title="ต้องการลบข้อมูลนี้?"
+            onConfirm={() => handleDelete(record.id)}
+            okText="ใช่"
+            cancelText="ไม่"
+            disabled={!record.id || deleteMutation.isPending}
+          >
             <Button 
               type="primary" 
-              icon={<EditOutlined />}
-              onClick={() => handleEdit(id)}
-              disabled={!id}
+              danger 
+              icon={<DeleteOutlined />}
+              disabled={!record.id || deleteMutation.isPending}
+              loading={deleteMutation.isPending}
             >
-              แก้ไข
+              ลบ
             </Button>
-            <Popconfirm
-              title="ต้องการลบข้อมูลนี้?"
-              onConfirm={() => handleDelete(id)}
-              okText="ใช่"
-              cancelText="ไม่"
-              disabled={!id}
-            >
-              <Button 
-                type="primary" 
-                danger 
-                icon={<DeleteOutlined />}
-                disabled={!id}
-              >
-                ลบ
-              </Button>
-            </Popconfirm>
-          </Space>
-        );
-      },
+          </Popconfirm>
+        </Space>
+      ),
     },
   ];
 
-  const fetchCars = async () => {
-    setLoading(true);
-    try {
-      const carsData = await carService.getAllCars();
-      setCars(carsData.map(car => ({
-        ...car,
-        key: car._links?.self?.href || car.id,
-      })));
-    } catch (error) {
-      console.error('Error fetching cars:', error);
-    }
-    setLoading(false);
-  };
-
-  const handleDelete = async (id) => {
-    if (!id) return;
-    try {
-      await carService.deleteCar(id);
-      fetchCars();
-    } catch (error) {
-      console.error('Error deleting car:', error);
-    }
-  };
-
-  const handleEdit = (id) => {
-    if (!id) return;
-    navigate(`/cars/${id}/edit`);
-  };
-
-  useEffect(() => {
-    fetchCars();
-  }, []);
+  if (error) {
+    return <div>เกิดข้อผิดพลาด: {error.message}</div>;
+  }
 
   return (
     <div className="carlist-container">
@@ -129,8 +136,11 @@ function CarList() {
       </div>
       <Table 
         columns={columns} 
-        dataSource={cars}
-        loading={loading}
+        dataSource={cars.map(car => ({
+          ...car,
+          key: car.id,
+        }))}
+        loading={isLoading || deleteMutation.isPending}
         pagination={{
           total: cars.length,
           pageSize: 10,
